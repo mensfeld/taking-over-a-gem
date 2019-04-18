@@ -1,1 +1,1 @@
-[https://mensfeld.github.io/karafka-ruby-kaigi-2018/index.html#/](https://mensfeld.github.io/karafka-ruby-kaigi-2018/index.html#/)
+[https://mensfeld.github.io/taking-over-a-gem/](https://mensfeld.github.io/taking-over-a-gem/)
